@@ -1,0 +1,72 @@
+# The suite runs as this release's Helm test: `helm test <release> --logs` passes or fails with it,
+# and prints the fixture tree the Console Launcher writes to stdout (suite-design §7).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "closure-conformance.name" . }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  restartPolicy: Never
+  activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+  containers:
+    - name: suite
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      env:
+        - name: DISCOVERY_URL
+          value: {{ required "discoveryUrl is required: the instance's discovery document" .Values.discoveryUrl | quote }}
+        - name: KAFKA_BOOTSTRAP
+          value: {{ required "kafkaBootstrap is required: a broker address reachable from the cluster" .Values.kafkaBootstrap | quote }}
+        - name: SETTLE_TIMEOUT
+          value: {{ .Values.settleTimeout | quote }}
+        - name: RESULT_SIZE_FANOUT
+          value: {{ .Values.resultSizeFanout | quote }}
+        {{- with .Values.runId }}
+        - name: RUN_ID
+          value: {{ . | quote }}
+        {{- end }}
+      {{- with .Values.kafkaClient.envSecret }}
+      envFrom:
+        - secretRef:
+            name: {{ . }}
+      {{- end }}
+      volumeMounts:
+        - name: reports
+          mountPath: /reports
+        - name: work
+          mountPath: /work
+        {{- if .Values.kafkaClient.filesSecret }}
+        - name: kafka-files
+          mountPath: {{ .Values.kafkaClient.filesMountPath }}
+          readOnly: true
+        {{- end }}
+      {{- with .Values.resources }}
+      resources:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumes:
+    - name: reports
+      emptyDir: {}
+    - name: work
+      emptyDir: {}
+    {{- with .Values.kafkaClient.filesSecret }}
+    - name: kafka-files
+      secret:
+        secretName: {{ . }}
+    {{- end }}
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}

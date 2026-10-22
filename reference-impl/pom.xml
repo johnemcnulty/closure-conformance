@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.example.closure</groupId>
+    <artifactId>closure-conformance</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>reference-impl</artifactId>
+  <name>Reference implementation</name>
+  <description>A deliberately simple instance for the suite to pass against, and its own build runs the suite against it (suite-design §5).</description>
+
+  <dependencies>
+    <!-- the wire codec is shared with the suite on purpose (suite-design §3a); the oracle is not -->
+    <dependency>
+      <groupId>com.example.closure</groupId>
+      <artifactId>conformance-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers-kafka</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- test scope only: the suite runs against this module, and nothing here may depend on it, or on the oracle -->
+    <dependency>
+      <groupId>com.example.closure</groupId>
+      <artifactId>conformance-suite</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- the broken-variant runs launch the suite the way its image will: through the Console Launcher -->
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-console</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- java.class.path must be the real classpath, which BrokenVariantsTest hands to the JVMs it forks -->
+          <useManifestOnlyJar>false</useManifestOnlyJar>
+          <!-- run the suite's fixtures, which live in its main jar, alongside this module's own tests -->
+          <dependenciesToScan>
+            <dependency>com.example.closure:conformance-suite</dependency>
+          </dependenciesToScan>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

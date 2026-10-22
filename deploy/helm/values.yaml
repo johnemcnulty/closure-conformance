@@ -1,0 +1,33 @@
+# The suite's image (deploy/Dockerfile).
+image:
+  repository: closure-conformance
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# How to reach the instance under test (suite-design §6). Both are required.
+discoveryUrl: ""
+kafkaBootstrap: ""
+
+# Polling bound for an effect to become visible; test configuration, not contract (§7).
+settleTimeout: PT30S
+# How many references fixture 10 builds its fan-out from.
+resultSizeFanout: 1000
+# Prefix for every id this run creates; generated if empty.
+runId: ""
+
+# Authentication against the broker. Credentials never go in values: name Secrets instead.
+kafkaClient:
+  # A Secret whose keys are KAFKA_CLIENT_* variables, each becoming a Kafka client property:
+  # KAFKA_CLIENT_SECURITY_PROTOCOL, KAFKA_CLIENT_SASL_MECHANISM, KAFKA_CLIENT_SASL_JAAS_CONFIG, ...
+  envSecret: ""
+  # A Secret of files — truststores, keystores — mounted at filesMountPath, for KAFKA_CLIENT_SSL_*
+  # settings to name, e.g. KAFKA_CLIENT_SSL_TRUSTSTORE_LOCATION=/etc/conformance/kafka/truststore.jks
+  filesSecret: ""
+  filesMountPath: /etc/conformance/kafka
+
+# The whole run must finish within this; a hung instance fails the test rather than holding it open.
+activeDeadlineSeconds: 1800
+
+resources: {}
+nodeSelector: {}
+tolerations: []

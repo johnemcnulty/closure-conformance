@@ -1,0 +1,47 @@
+{
+  "data": {
+    "type": "instance",
+    "id": "conformance",
+    "attributes": {
+      "ingestTopic": "conformance-edges",
+      "closures": [
+        { "name": "containers", "inverse": "contents",
+          "admits": [ { "edgeType": "holds", "direction": "reverse" } ],
+          "links": { "of": "https://gw.example/conformance/v1/containers/of",
+                     "cycles": "https://gw.example/conformance/v1/containers/cycles" } },
+        { "name": "contents", "inverse": "containers",
+          "links": { "of": "https://gw.example/conformance/v1/contents/of",
+                     "cycles": "https://gw.example/conformance/v1/contents/cycles" } },
+        { "name": "suppliers", "inverse": "consumers",
+          "admits": [ { "edgeType": "fed_by", "direction": "forward" } ],
+          "links": { "of": "https://gw.example/conformance/v1/suppliers/of",
+                     "cycles": "https://gw.example/conformance/v1/suppliers/cycles" } },
+        { "name": "consumers", "inverse": "suppliers",
+          "links": { "of": "https://gw.example/conformance/v1/consumers/of",
+                     "cycles": "https://gw.example/conformance/v1/consumers/cycles" } },
+        { "name": "dependents", "inverse": "dependencies",
+          "admits": [ { "edgeType": "holds",  "direction": "forward" },
+                      { "edgeType": "tracks", "direction": "forward" } ],
+          "links": { "of": "https://gw.example/conformance/v1/dependents/of",
+                     "cycles": "https://gw.example/conformance/v1/dependents/cycles" } },
+        { "name": "dependencies", "inverse": "dependents",
+          "links": { "of": "https://gw.example/conformance/v1/dependencies/of",
+                     "cycles": "https://gw.example/conformance/v1/dependencies/cycles" } }
+      ],
+      "edgeTypes": [
+        { "name": "holds",  "inverse": "held_by",    "authored": "holds" },
+        { "name": "feeds",  "inverse": "fed_by",     "authored": "fed_by" },
+        { "name": "tracks", "inverse": "tracked_by", "authored": "tracks" },
+        { "name": "notes",  "authored": "notes" }
+      ],
+      "cardinalityRules": [
+        { "id": "one-holder", "edgeType": "holds",
+          "objectTypes": ["beta", "gamma"],
+          "minEdgesPerObject": 1, "maxEdgesPerObject": 1 },
+        { "id": "tracks-fanout", "edgeType": "tracks",
+          "subjectTypes": ["beta"],
+          "maxEdgesPerSubject": 2 }
+      ]
+    }
+  }
+}

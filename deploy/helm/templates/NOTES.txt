@@ -1,0 +1,5 @@
+The conformance suite is installed as a Helm test and has not run yet. Run it with:
+
+  helm test {{ .Release.Name }} --logs
+
+It passes only if every fixture passes against {{ .Values.discoveryUrl }}.

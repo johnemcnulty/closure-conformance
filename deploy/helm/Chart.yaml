@@ -1,0 +1,8 @@
+apiVersion: v2
+name: closure-conformance
+description: >-
+  The relationship closure conformance suite, run as a Helm test against an instance already
+  installed (suite-design §7). Independent of any implementation's chart.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,5 @@
+# The image needs only the packaged suite and its notices (deploy/Dockerfile).
+*
+!conformance-suite/target/lib/
+!conformance-suite/target/conformance-suite-*.jar
+!THIRD-PARTY-NOTICES.md
